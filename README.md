@@ -32,6 +32,15 @@ Frontend runs at **http://localhost:5173**, backend at **http://localhost:5000**
 
 ---
 
+## 🎨 UI & UX Highlights
+- **Linear/Things-Inspired Aesthetics:** Clean, keyboard-friendly row layout with dark mode support.
+- **Interactive Status Dropdown:** Easily change status directly from the task list (`Todo` ➔ `In Progress` ➔ `Done`) with instant visual feedback.
+- **Segmented Filter Buttons:** One-click filter chips for Status and Priority with dedicated icons.
+- **Analytics Dashboard:** SVG Radial completion progress ring, compact 4-stat metric bar, and responsive Donut chart with custom tooltips.
+- **Focused Task Panel Modal:** Fast task creation/editing with autofocus and `Escape` key close support.
+
+---
+
 ## 📁 Project Structure
 
 ```
