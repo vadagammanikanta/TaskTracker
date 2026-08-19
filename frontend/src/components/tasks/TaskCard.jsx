@@ -120,7 +120,7 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
   const currentStatusObj = ALL_STATUSES.find(s => s.value === task.status) || ALL_STATUSES[0];
 
   return (
-    <div className={`task-row${isDone ? ' task-done' : ''}`}>
+    <div className={`task-row${isDone ? ' task-done' : ''}${menuOpen ? ' menu-active' : ''}`}>
       {/* Quick Check / Progress icon button */}
       <button
         className={`task-check${isDone ? ' checked' : ''}${isInProgress ? ' in-progress' : ''}`}
