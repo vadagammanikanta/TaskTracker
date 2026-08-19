@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { updateTask, completeTask } from '../../api/taskApi';
 import { useToast } from '../common/ToastContext';
 
 const PRIORITY_DOT = { High: 'high', Medium: 'medium', Low: 'low' };
-const STATUS_PILL  = { 'Todo': 'todo', 'In Progress': 'inprogress', 'Done': 'done' };
-const STATUS_CYCLE = { 'Todo': 'In Progress', 'In Progress': 'Done', 'Done': 'Todo' };
+
+const ALL_STATUSES = [
+  { value: 'Todo',        label: 'Todo',        icon: '○', className: 'todo' },
+  { value: 'In Progress', label: 'In Progress', icon: '◐', className: 'inprogress' },
+  { value: 'Done',        label: 'Done',        icon: '✓', className: 'done' },
+];
 
 function CheckIcon() {
   return (
@@ -18,6 +22,14 @@ function InProgressIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18A8 8 0 0 1 12 4v16Z" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
@@ -45,6 +57,20 @@ function TrashIcon() {
 export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
   const { addToast } = useToast();
   const [updating, setUpdating] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const handleToggleComplete = async (e) => {
     e.stopPropagation();
@@ -60,14 +86,16 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
     }
   };
 
-  const handleCycleStatus = async (e) => {
+  const handleSelectStatus = async (newStatus, e) => {
     e.stopPropagation();
-    const nextStatus = STATUS_CYCLE[task.status] || 'Todo';
+    setMenuOpen(false);
+    if (newStatus === task.status) return;
+
     setUpdating(true);
     try {
-      const res = await updateTask(task._id, { status: nextStatus });
+      const res = await updateTask(task._id, { status: newStatus });
       onComplete(res.data.task);
-      addToast(`Status: ${nextStatus}`);
+      addToast(`Status changed to ${newStatus}`);
     } catch {
       addToast('Failed to update status', 'error');
     } finally {
@@ -89,15 +117,16 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'Done';
   const isDone = task.status === 'Done';
   const isInProgress = task.status === 'In Progress';
+  const currentStatusObj = ALL_STATUSES.find(s => s.value === task.status) || ALL_STATUSES[0];
 
   return (
     <div className={`task-row${isDone ? ' task-done' : ''}`}>
-      {/* Status check / progress icon */}
+      {/* Quick Check / Progress icon button */}
       <button
         className={`task-check${isDone ? ' checked' : ''}${isInProgress ? ' in-progress' : ''}`}
         onClick={handleToggleComplete}
         disabled={updating}
-        title={isDone ? 'Mark as Todo' : isInProgress ? 'Mark as Done' : 'Mark as Done'}
+        title={isDone ? 'Mark as Todo' : 'Mark as Done'}
         aria-label={task.status}
       >
         {isDone && <CheckIcon />}
@@ -119,16 +148,41 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
               {formatDate(task.dueDate)}
             </span>
           )}
-          {/* Clickable status pill to quickly cycle Todo -> In Progress -> Done */}
-          <button
-            type="button"
-            className={`status-pill ${STATUS_PILL[task.status] || 'todo'} status-pill-btn`}
-            onClick={handleCycleStatus}
-            disabled={updating}
-            title="Click to cycle status (Todo → In Progress → Done)"
-          >
-            {task.status}
-          </button>
+
+          {/* Interactive Status Selector Dropdown */}
+          <div className="status-dropdown-wrapper" ref={menuRef}>
+            <button
+              type="button"
+              className={`status-select-btn status-btn-${currentStatusObj.className}`}
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+              disabled={updating}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              title="Click to change status"
+            >
+              <span className="status-btn-icon">{currentStatusObj.icon}</span>
+              <span className="status-btn-text">{task.status}</span>
+              <span className="status-btn-chevron"><ChevronDownIcon /></span>
+            </button>
+
+            {menuOpen && (
+              <div className="status-menu-popup" role="menu">
+                {ALL_STATUSES.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    className={`status-menu-item item-${s.className}${s.value === task.status ? ' selected' : ''}`}
+                    onClick={(e) => handleSelectStatus(s.value, e)}
+                    role="menuitem"
+                  >
+                    <span className="menu-item-icon">{s.icon}</span>
+                    <span className="menu-item-text">{s.label}</span>
+                    {s.value === task.status && <span className="menu-item-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
