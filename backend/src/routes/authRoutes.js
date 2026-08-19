@@ -12,10 +12,10 @@ const router = express.Router();
 // Applies only to signup and login to mitigate brute-force attacks.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15-minute sliding window
-  max: 15,                   // Maximum 15 requests per window
+  max: 100,                  // Generous limit to prevent false positives behind reverse proxies
   message: {
     success: false,
-    message: 'Too many requests, please try again in 15 minutes',
+    message: 'Too many requests from this IP, please try again in 15 minutes',
   },
   standardHeaders: true,
   legacyHeaders: false,

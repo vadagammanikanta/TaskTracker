@@ -17,9 +17,10 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
-// ── App setup ─────────────────────────────────────────────────────────────────
-
 const app = express();
+
+// Enable trust proxy for reverse proxies (Render, Cloudflare, Heroku) so rate limiters and secure cookies work accurately
+app.set('trust proxy', 1);
 
 // ── Global middleware ─────────────────────────────────────────────────────────
 

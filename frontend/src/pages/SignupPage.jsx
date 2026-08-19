@@ -35,7 +35,8 @@ export default function SignupPage() {
       addToast('Account created! Welcome!');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed');
+      const msg = err.response?.data?.message || err.message || 'Signup failed. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
