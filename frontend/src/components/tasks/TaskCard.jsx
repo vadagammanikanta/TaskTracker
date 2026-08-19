@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import { completeTask } from '../../api/taskApi';
+import { updateTask, completeTask } from '../../api/taskApi';
 import { useToast } from '../common/ToastContext';
 
 const PRIORITY_DOT = { High: 'high', Medium: 'medium', Low: 'low' };
 const STATUS_PILL  = { 'Todo': 'todo', 'In Progress': 'inprogress', 'Done': 'done' };
+const STATUS_CYCLE = { 'Todo': 'In Progress', 'In Progress': 'Done', 'Done': 'Todo' };
 
 function CheckIcon() {
   return (
     <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="1.5,5 4,7.5 8.5,2.5" />
+    </svg>
+  );
+}
+
+function InProgressIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18A8 8 0 0 1 12 4v16Z" />
     </svg>
   );
 }
@@ -35,19 +44,34 @@ function TrashIcon() {
 
 export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
   const { addToast } = useToast();
-  const [completing, setCompleting] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
-  const handleComplete = async (e) => {
+  const handleToggleComplete = async (e) => {
     e.stopPropagation();
-    setCompleting(true);
+    setUpdating(true);
     try {
       const res = await completeTask(task._id);
       onComplete(res.data.task);
-      addToast(res.data.task.status === 'Done' ? 'Task completed' : 'Task reopened');
+      addToast(res.data.task.status === 'Done' ? 'Task marked Done' : 'Task reopened');
     } catch {
       addToast('Failed to update task', 'error');
     } finally {
-      setCompleting(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleCycleStatus = async (e) => {
+    e.stopPropagation();
+    const nextStatus = STATUS_CYCLE[task.status] || 'Todo';
+    setUpdating(true);
+    try {
+      const res = await updateTask(task._id, { status: nextStatus });
+      onComplete(res.data.task);
+      addToast(`Status: ${nextStatus}`);
+    } catch {
+      addToast('Failed to update status', 'error');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -64,18 +88,20 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'Done';
   const isDone = task.status === 'Done';
+  const isInProgress = task.status === 'In Progress';
 
   return (
     <div className={`task-row${isDone ? ' task-done' : ''}`}>
-      {/* Completion circle */}
+      {/* Status check / progress icon */}
       <button
-        className={`task-check${isDone ? ' checked' : ''}`}
-        onClick={handleComplete}
-        disabled={completing}
-        title={isDone ? 'Reopen task' : 'Mark complete'}
-        aria-label={isDone ? 'Reopen task' : 'Mark complete'}
+        className={`task-check${isDone ? ' checked' : ''}${isInProgress ? ' in-progress' : ''}`}
+        onClick={handleToggleComplete}
+        disabled={updating}
+        title={isDone ? 'Mark as Todo' : isInProgress ? 'Mark as Done' : 'Mark as Done'}
+        aria-label={task.status}
       >
-        {(isDone || completing) && <CheckIcon />}
+        {isDone && <CheckIcon />}
+        {isInProgress && <InProgressIcon />}
       </button>
 
       {/* Priority dot */}
@@ -93,9 +119,16 @@ export default function TaskCard({ task, onEdit, onDelete, onComplete }) {
               {formatDate(task.dueDate)}
             </span>
           )}
-          <span className={`status-pill ${STATUS_PILL[task.status] || 'todo'}`}>
+          {/* Clickable status pill to quickly cycle Todo -> In Progress -> Done */}
+          <button
+            type="button"
+            className={`status-pill ${STATUS_PILL[task.status] || 'todo'} status-pill-btn`}
+            onClick={handleCycleStatus}
+            disabled={updating}
+            title="Click to cycle status (Todo → In Progress → Done)"
+          >
             {task.status}
-          </span>
+          </button>
         </div>
       </div>
 

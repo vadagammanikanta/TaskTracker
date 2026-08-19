@@ -607,6 +607,15 @@ select { cursor: pointer; appearance: none; padding-right: 2rem; background-imag
   border-color: var(--accent);
   color: var(--text-on-accent);
 }
+.task-check.in-progress {
+  border-color: var(--s-inprogress-text);
+  color: var(--s-inprogress-text);
+  background: var(--s-inprogress-bg);
+}
+.task-check.in-progress:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .task-check svg { width: 10px; height: 10px; }
 
 /* Priority dot */
@@ -660,10 +669,24 @@ select { cursor: pointer; appearance: none; padding-right: 2rem; background-imag
   border-radius: var(--r-full);
   white-space: nowrap;
   letter-spacing: 0.02em;
+  border: none;
 }
 .status-pill.todo { background: var(--s-todo-bg); color: var(--s-todo-text); }
 .status-pill.inprogress { background: var(--s-inprogress-bg); color: var(--s-inprogress-text); }
 .status-pill.done { background: var(--s-done-bg); color: var(--s-done-text); }
+
+.status-pill-btn {
+  cursor: pointer;
+  transition: transform var(--duration), opacity var(--duration), filter var(--duration);
+  font-family: inherit;
+}
+.status-pill-btn:hover {
+  filter: brightness(0.92);
+  transform: scale(1.04);
+}
+[data-theme='dark'] .status-pill-btn:hover {
+  filter: brightness(1.2);
+}
 
 /* Row actions (appear on hover) */
 .task-row-actions {

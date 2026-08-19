@@ -9,7 +9,11 @@ const LIGHT_COLORS = {
   done:       { bg: '#0D9488', text: '#FFFFFF' },
 };
 
-const CHART_COLORS = ['#9CA3AF', '#F59E0B', '#0D9488'];
+const STATUS_COLORS = {
+  'Todo': '#9CA3AF',
+  'In Progress': '#F59E0B',
+  'Done': '#0D9488',
+};
 
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
@@ -71,8 +75,8 @@ export default function AnalyticsChart({ analytics }) {
           dataKey="value"
           stroke="none"
         >
-          {data.map((_, i) => (
-            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+          {data.map((entry) => (
+            <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || '#9CA3AF'} />
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
