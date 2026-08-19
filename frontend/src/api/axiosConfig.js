@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// Normalize baseURL: ensures /api is always appended even if user set VITE_API_URL without /api
+let rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let cleanBaseURL = rawBaseURL.trim().replace(/\/+$/, '');
+if (!cleanBaseURL.endsWith('/api')) {
+  cleanBaseURL += '/api';
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: cleanBaseURL,
   withCredentials: true, // Send cookies with every request
 });
 

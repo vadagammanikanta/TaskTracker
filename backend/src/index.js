@@ -58,11 +58,15 @@ if (process.env.NODE_ENV !== 'test') {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
+// Mount on both /api/* and /* to handle any frontend base URL configuration gracefully
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/tasks', taskRoutes);
+app.use('/tasks', taskRoutes);
 
 // Basic health-check endpoint (no auth required)
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health', '/'], (req, res) => {
   res.json({ success: true, message: 'Task Tracker API is running' });
 });
 
