@@ -23,10 +23,23 @@ const app = express();
 
 // ── Global middleware ─────────────────────────────────────────────────────────
 
-// Allow the React dev server to call this API and send credentials (cookies)
+// Allow the React client (local or production domain) to call this API with cookies
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, Postman) or allowed origins
+      if (!origin || allowedOrigins.some((o) => origin.startsWith(o) || o === '*')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permissive for production deployment
+      }
+    },
     credentials: true,
   })
 );

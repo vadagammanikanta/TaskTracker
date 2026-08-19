@@ -18,14 +18,17 @@ const signToken = (id) =>
 /**
  * Attach a 'token' httpOnly cookie to the response.
  * Cookie is valid for 1 hour (3 600 000 ms).
+ * In production across domains (e.g. vercel.app -> onrender.com),
+ * sameSite must be 'none' and secure must be true.
  * @param {import('express').Response} res
  * @param {string} token
  */
 const attachCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === 'production';
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 3_600_000, // 1 hour in milliseconds
   });
 };
@@ -93,12 +96,15 @@ const login = asyncHandler(async (req, res) => {
  * Clear the session cookie to log the user out.
  */
 const logout = asyncHandler(async (req, res) => {
+  const isProd = process.env.NODE_ENV === 'production';
   res.cookie('token', '', {
     httpOnly: true,
-    expires: new Date(0), // Immediately expire the cookie
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    expires: new Date(0),
   });
 
-  res.status(200).json({ success: true, message: 'Logged out' });
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
 });
 
 /**
