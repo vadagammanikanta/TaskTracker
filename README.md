@@ -1,71 +1,140 @@
-# TaskTracker — Full Stack MERN Task Management System
+# 🚀 TaskTracker — Full-Stack MERN Task Management System
 
-A production-ready Task Management System built with MongoDB, Express, React (Vite), and Node.js.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://task-tracker-ten-rose.vercel.app/)
+[![API Backend](https://img.shields.io/badge/Backend%20API-Render-46E3B7?style=for-the-badge&logo=render)](https://tasktracker-api-jrna.onrender.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+
+A modern, keyboard-friendly **Task Management System** built with the **MERN** stack (MongoDB, Express.js, React 19 + Vite, Node.js). Designed with a **Linear/Things-inspired aesthetic**, dense row layouts, real-time analytics powered by MongoDB aggregation pipelines, and production-grade security.
 
 ---
 
-## 🚀 Quick Start
+## 🔗 Live Links
 
-### Prerequisites
-- Node.js 18+
-- MongoDB (local or Atlas URI)
+- 🌐 **Frontend Application (Live):** [https://task-tracker-ten-rose.vercel.app/](https://task-tracker-ten-rose.vercel.app/)
+- ⚙️ **Backend REST API (Live):** [https://tasktracker-api-jrna.onrender.com/](https://tasktracker-api-jrna.onrender.com/)
+- 📁 **GitHub Repository:** [https://github.com/vadagammanikanta/TaskTracker](https://github.com/vadagammanikanta/TaskTracker)
 
-### 1. Clone & configure backend
+---
 
+## ✨ Features & Highlights
+
+### 🎨 Linear-Inspired UI & Design System
+- **Dense Row Layout:** Clean task list with circular completion triggers, priority color dots, and hover-revealed actions.
+- **Interactive Status Selector Dropdown:** Change status directly from the list row (`Todo` ➔ `In Progress` ➔ `Done`) with instant visual feedback.
+- **Segmented Filter Buttons:** Interactive button chips for Status and Priority filters with icons and active highlights.
+- **Dark Mode Support:** Smooth theme toggling (Warm Neutral `#FAFAF9` ⇄ Deep Dark `#0E0E10`), persisted in `localStorage` with zero flash.
+- **Focused Task Modal:** Keyboard-friendly creation/editing with autofocus and `Escape` key close support.
+- **Feedback & States:** Skeleton shimmer loaders on async calls, button spinners, and global toast notifications.
+
+### 🔐 Robust Authentication & Security
+- **Dual-Layer JWT Auth:** `httpOnly` secure cookies with fallback `Authorization: Bearer <token>` support for seamless cross-domain operation.
+- **Password Protection:** Hashed using `bcryptjs` (12 salt rounds) with complexity enforcement (8+ chars, uppercase, lowercase, number).
+- **Strict User Scoping:** Every single query in MongoDB is scoped strictly to `req.userId` ensuring complete tenant data isolation.
+- **Rate Limiting & Proxy Trust:** Configured with `express-rate-limit` and `trust proxy` for secure reverse-proxy deployments.
+
+### 📊 Real-Time Analytics
+- **MongoDB Aggregation Pipeline:** `GET /api/tasks/analytics` runs a `$facet` pipeline with `$group` to compute statistics on the database level in a single round-trip.
+- **Hero Completion Metric:** Custom SVG Radial Progress Ring displaying overall completion percentage.
+- **Compact Metric Row:** Instant totals for `Total`, `Done`, `In Progress`, and `Todo`.
+- **Recharts Donut Breakdown:** Responsive status distribution chart with custom tooltips and status-keyed legend.
+
+### 🔍 Dynamic Filtering, Sorting & Search
+- **Full-Text Search:** Case-insensitive search powered by MongoDB `$text` title index.
+- **Weighted Priority Sort:** Dynamic `$addFields` pipeline stage mapping `High (3) > Medium (2) > Low (1)`.
+- **Due Date Sorting:** Earliest or latest due date ordering.
+- **URL Synchronization:** All filter, sort, and pagination states sync with `useSearchParams` to survive page refreshes.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19, Vite, React Router v7, Axios, Recharts |
+| **State & Theming** | React Context API (`AuthContext`, `ThemeContext`, `ToastContext`), CSS Variables |
+| **Backend** | Node.js, Express.js 4 |
+| **Database** | MongoDB with Mongoose 8 (Indexes & Aggregations) |
+| **Authentication** | JWT (`jsonwebtoken`), `bcryptjs`, `cookie-parser` |
+| **Validation** | `express-validator` |
+| **Deployment** | Vercel (Frontend SPA) + Render (Backend Web Service) + MongoDB Atlas (Database) |
+
+---
+
+## 📁 Repository Structure
+
+```
+TaskTracker/
+├── backend/
+│   ├── src/
+│   │   ├── config/             # MongoDB Mongoose connection
+│   │   ├── controllers/        # authController, taskController
+│   │   ├── middleware/         # auth (JWT), errorHandler, validate
+│   │   ├── models/             # User & Task Mongoose schemas + indexes
+│   │   ├── routes/             # authRoutes, taskRoutes
+│   │   ├── utils/              # asyncHandler, ApiError
+│   │   └── index.js            # Express app entry & middleware setup
+│   ├── .env.example
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── api/                # axiosConfig, authApi, taskApi
+│   │   ├── components/
+│   │   │   ├── analytics/      # AnalyticsChart (Donut), StatCard
+│   │   │   ├── common/         # ConfirmModal, Pagination, Skeleton, Spinner, Toast
+│   │   │   ├── layout/         # Navbar, Layout
+│   │   │   └── tasks/          # TaskCard (Row layout), TaskFilters, TaskForm
+│   │   ├── context/            # AuthContext, ThemeContext, ToastContext
+│   │   ├── pages/              # DashboardPage, TasksPage, LoginPage, SignupPage
+│   │   ├── routes/             # ProtectedRoute
+│   │   ├── App.jsx
+│   │   ├── index.css           # Design tokens, variables & responsive styling
+│   │   └── main.jsx
+│   ├── vercel.json             # SPA routing rewrite rules
+│   ├── vite.config.js
+│   └── package.json
+└── README.md
+```
+
+---
+
+## ⚡ Quick Start (Local Setup)
+
+### 1. Prerequisites
+- **Node.js** 18+ installed
+- **MongoDB** running locally or a MongoDB Atlas URI
+
+### 2. Backend Setup
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your MONGO_URI and a strong JWT_SECRET
+```
+Configure `.env`:
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/tasktracker
+JWT_SECRET=your_super_secret_jwt_key_here
+JWT_EXPIRE=1h
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
+```
+Install dependencies and run:
+```bash
 npm install
 npm run dev
 ```
+Backend will start on `http://localhost:5000`.
 
-### 2. Start frontend
-
+### 3. Frontend Setup
+Open a new terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-Frontend runs at **http://localhost:5173**, backend at **http://localhost:5000**.
-
----
-
-## 🎨 UI & UX Highlights
-- **Linear/Things-Inspired Aesthetics:** Clean, keyboard-friendly row layout with dark mode support.
-- **Interactive Status Dropdown:** Easily change status directly from the task list (`Todo` ➔ `In Progress` ➔ `Done`) with instant visual feedback.
-- **Segmented Filter Buttons:** One-click filter chips for Status and Priority with dedicated icons.
-- **Analytics Dashboard:** SVG Radial completion progress ring, compact 4-stat metric bar, and responsive Donut chart with custom tooltips.
-- **Focused Task Panel Modal:** Fast task creation/editing with autofocus and `Escape` key close support.
-
----
-
-## 📁 Project Structure
-
-```
-/
-├── backend/
-│   ├── src/
-│   │   ├── config/         # MongoDB connection
-│   │   ├── controllers/    # Route handler logic
-│   │   ├── middleware/     # auth, errorHandler, validate
-│   │   ├── models/         # Mongoose User & Task schemas
-│   │   ├── routes/         # Express routers
-│   │   ├── utils/          # asyncHandler, ApiError
-│   │   └── index.js        # App entry point
-│   ├── .env.example
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── api/            # Axios instances + API calls
-│   │   ├── components/     # Reusable UI components
-│   │   ├── context/        # Auth & Theme context
-│   │   ├── pages/          # Route-level pages
-│   │   └── routes/         # ProtectedRoute wrapper
-│   └── package.json
-└── README.md
-```
+Frontend will start on `http://localhost:5173`.
 
 ---
 
@@ -73,130 +142,67 @@ Frontend runs at **http://localhost:5173**, backend at **http://localhost:5000**
 
 All endpoints return `{ success: true, ... }` on success and `{ success: false, message: "..." }` on error.
 
-### Authentication
+### Authentication (`/api/auth`)
 
-| Method | Path | Auth | Body | Response |
-|--------|------|------|------|----------|
-| `POST` | `/api/auth/signup` | ❌ | `{ name, email, password }` | `{ success, user: { _id, name, email } }` + httpOnly cookie |
-| `POST` | `/api/auth/login` | ❌ | `{ email, password }` | `{ success, user: { _id, name, email } }` + httpOnly cookie |
-| `POST` | `/api/auth/logout` | ✅ | — | `{ success, message }` |
-| `GET` | `/api/auth/me` | ✅ | — | `{ success, user }` |
+| Method | Endpoint | Auth Required | Body / Payload | Description |
+|---|---|:---:|---|---|
+| `POST` | `/api/auth/signup` | ❌ | `{ name, email, password }` | Register new user, return JWT cookie + token |
+| `POST` | `/api/auth/login` | ❌ | `{ email, password }` | Authenticate user, return JWT cookie + token |
+| `POST` | `/api/auth/logout` | ✅ | — | Invalidate session & clear token |
+| `GET` | `/api/auth/me` | ✅ | — | Get currently authenticated user profile |
 
-### Tasks
+### Tasks (`/api/tasks`)
 
-| Method | Path | Auth | Body / Params | Response |
-|--------|------|------|---------------|----------|
-| `POST` | `/api/tasks` | ✅ | `{ title, description?, status?, priority?, dueDate? }` | `{ success, task }` |
-| `GET` | `/api/tasks` | ✅ | Query: `status`, `priority`, `search`, `page`, `limit`, `sortBy`, `order` | `{ success, tasks, pagination }` |
-| `GET` | `/api/tasks/:id` | ✅ | — | `{ success, task }` |
-| `PUT` | `/api/tasks/:id` | ✅ | Any task fields | `{ success, task }` |
-| `DELETE` | `/api/tasks/:id` | ✅ | — | `{ success, message }` |
-| `PATCH` | `/api/tasks/:id/complete` | ✅ | — | `{ success, task }` (toggles Done ↔ Todo) |
-| `GET` | `/api/tasks/analytics` | ✅ | — | `{ success, analytics: { total, completed, pending, inProgress, completionPercentage } }` |
+| Method | Endpoint | Auth Required | Params / Body | Description |
+|---|---|:---:|---|---|
+| `GET` | `/api/tasks/analytics` | ✅ | — | MongoDB `$facet` aggregation statistics |
+| `POST` | `/api/tasks` | ✅ | `{ title, description?, status?, priority?, dueDate? }` | Create a new task |
+| `GET` | `/api/tasks` | ✅ | Query: `status`, `priority`, `search`, `page`, `limit`, `sortBy`, `order` | List paginated, filtered & sorted tasks |
+| `GET` | `/api/tasks/:id` | ✅ | — | Fetch single task by ID |
+| `PUT` | `/api/tasks/:id` | ✅ | Task fields to update | Update task details |
+| `DELETE` | `/api/tasks/:id` | ✅ | — | Delete task permanently |
+| `PATCH` | `/api/tasks/:id/complete` | ✅ | — | Quick toggle task status (`Done` ⇄ `Todo`) |
 
-#### Pagination response shape
-```json
-{
-  "pagination": {
-    "totalCount": 42,
-    "totalPages": 5,
-    "currentPage": 2,
-    "limit": 9
-  }
-}
-```
-
-#### Query param details for `GET /api/tasks`
-| Param | Type | Description |
-|-------|------|-------------|
-| `status` | `Todo \| In Progress \| Done` | Filter by status |
-| `priority` | `Low \| Medium \| High` | Filter by priority |
-| `search` | string | Case-insensitive title search (uses MongoDB text index) |
-| `page` | number (default: 1) | Page number |
-| `limit` | number (default: 9) | Items per page |
-| `sortBy` | `dueDate \| priority` | Field to sort by |
-| `order` | `asc \| desc` (default: `desc`) | Sort direction |
+#### Query Parameters for `GET /api/tasks`
+- `status`: `Todo` | `In Progress` | `Done`
+- `priority`: `Low` | `Medium` | `High`
+- `search`: Case-insensitive title search
+- `sortBy`: `dueDate` | `priority`
+- `order`: `asc` | `desc` (Default: `desc`)
+- `page`: Page number (Default: `1`)
+- `limit`: Items per page (Default: `12`)
 
 ---
 
-## 🏗️ Design Decisions
+## 🏗️ Design Decisions & Architecture
 
-### 1. JWT Storage: httpOnly Cookies
-**Decision:** JWT stored in an `httpOnly`, `SameSite=strict` cookie — not `localStorage`.
+### 1. Dual Authentication: `httpOnly` Cookie + Bearer Token Fallback
+- **Decision:** The API issues an `httpOnly`, `SameSite=None`, `Secure` cookie and simultaneously returns the `token` in the JSON payload for `Authorization: Bearer` storage.
+- **Rationale:** While `httpOnly` cookies provide maximum security against XSS in same-origin environments, modern browsers (Safari, Chrome Incognito) frequently block third-party cookies across separate domains (e.g. `vercel.app` ➔ `onrender.com`). Supporting both guarantees 100% reliability across all browsers without sacrificing security.
 
-**Why:** `httpOnly` cookies are inaccessible to JavaScript, eliminating XSS-based token theft. `SameSite=strict` provides CSRF protection without needing a separate CSRF token for same-origin SPAs. The trade-off is slightly more complex cross-origin setup (`withCredentials: true` on Axios + `credentials: true` on CORS), but the security gain is worth it.
+### 2. Priority Sorting via MongoDB `$addFields` Pipeline
+- **Decision:** When sorting by priority, the database pipeline maps string enums to numeric weights (`High: 3`, `Medium: 2`, `Low: 1`) using `$switch` before applying the sort.
+- **Rationale:** Standard alphabetical sorting fails (`High` > `Low` > `Medium`). Converting to numerical weights at the database level keeps pagination and sorting server-authoritative without pulling the full collection into memory.
 
----
+### 3. Compound & Text Indexing
+- **Decision:** Declared 3 specialized indexes on the Task schema:
+  - `{ userId: 1, status: 1 }` — speeds up the most common status-filtered queries.
+  - `{ userId: 1, dueDate: 1 }` — speeds up calendar and date-ordered task retrieval.
+  - `{ title: 'text' }` — enables full-text case-insensitive keyword searches.
+- **Rationale:** Ensures zero full-collection scans as user task collections grow.
 
-### 2. Priority Sort via Aggregation Pipeline
-**Decision:** When `sortBy=priority`, the API uses a MongoDB `$addFields` aggregation stage to convert the enum string to a numeric weight (High=3, Medium=2, Low=1), then sorts by that weight.
+### 4. Real-Time Analytics with Single `$facet` Aggregation
+- **Decision:** Computed in a single `$facet` stage combining `$group` status counts and total document counts.
+- **Rationale:** Performs all aggregation logic in a single atomic database query rather than multiple `countDocuments` round-trips.
 
-**Why:** Alphabetical sort of "High/Medium/Low" doesn't produce the correct order. Mapping to numeric weights at the DB level avoids loading all tasks into JS to re-sort, and keeps the sort logic server-authoritative.
-
----
-
-### 3. MongoDB Indexes
-Three indexes are declared on the Task model:
-- `{ userId: 1, status: 1 }` — compound index for the most common filter combination (all my tasks filtered by status)
-- `{ userId: 1, dueDate: 1 }` — compound index for date-sorted task lists
-- `{ title: 'text' }` — text index enabling MongoDB's `$text` search (case-insensitive, stemming support)
-
-These mean the DB never does full collection scans for typical task queries.
-
----
-
-### 4. Pagination: Server-Side with `$skip/$limit`
-**Decision:** Pagination is done server-side with `?page=&limit=` params. The API returns `totalCount`, `totalPages`, `currentPage`, and `limit` in a `pagination` envelope.
-
-**Why:** Cursor-based pagination is faster for huge datasets, but `skip/limit` is simpler, works with arbitrary sorting, and is perfectly adequate for user-scoped task lists (hundreds, not millions, of records). URL-reflected pagination means filters + page survive a browser refresh.
+### 5. Context API over Redux Toolkit
+- **Decision:** Auth and UI theme states are managed via React Context API (`AuthContext`, `ThemeContext`, `ToastContext`).
+- **Rationale:** Auth and theme state is concise and global; Redux Toolkit introduces boilerplate without additional architectural benefit for this scale.
 
 ---
 
-### 5. Analytics: MongoDB `$facet` Aggregation
-**Decision:** The `/api/tasks/analytics` endpoint uses a single `$facet` aggregation query rather than multiple `countDocuments` calls or JS-side counting.
+## 👤 Author
 
-**Why:** `$facet` runs multiple sub-pipelines in a single DB round-trip, making it both faster and atomic. The result accurately reflects a consistent snapshot of task state.
-
----
-
-### 6. Error Handling: Centralized Middleware
-**Decision:** All async handlers are wrapped in `asyncHandler()` (a higher-order function that catches promise rejections and forwards them to `next()`). A single `errorHandler` Express middleware at the end of the middleware chain intercepts all errors and returns a consistent `{ success: false, message }` shape.
-
-**Why:** Avoids repetitive `try/catch` in every route, guarantees no unhandled promise rejections, and ensures all error responses share the same JSON shape for easy frontend handling.
-
----
-
-### 7. Frontend State: Context API (not Redux)
-**Decision:** Auth state is managed via React Context API + `useReducer`-style state, not Redux Toolkit.
-
-**Why:** The auth state is simple (user object + loading flag) and is only set in a handful of places. Redux adds boilerplate overhead that isn't justified here. For task list state, local component state is sufficient since each page owns its data.
-
----
-
-### 8. Dark Mode: CSS Variables + `data-theme` Attribute
-**Decision:** All colors use CSS custom properties; the `ThemeContext` sets `document.documentElement.setAttribute('data-theme', 'dark')` to switch themes. Preference is persisted in `localStorage`.
-
-**Why:** No JS-in-CSS runtime needed. A single CSS selector (`[data-theme='dark']`) overrides all variables, giving instant theme switching with zero flash for returning users.
-
----
-
-## 🔒 Security Notes
-- Passwords hashed with bcrypt (12 salt rounds)
-- Auth routes rate-limited to 15 requests / 15 minutes
-- All task operations scoped to `req.userId` — cross-user data access is impossible
-- Server-side input validation on every write endpoint via `express-validator`
-- `NODE_ENV=production` enables `secure` flag on cookies (HTTPS only)
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite, React Router v7, Axios, Recharts |
-| State | Context API (Auth), URL search params (filters) |
-| Backend | Node.js, Express 4 |
-| Database | MongoDB, Mongoose 8 |
-| Auth | JWT (1h expiry), bcryptjs |
-| Validation | express-validator |
-| Rate Limiting | express-rate-limit |
+- **Name:** Manikanta Vadagam
+- **GitHub:** [@vadagammanikanta](https://github.com/vadagammanikanta)
+- **Repository:** [TaskTracker](https://github.com/vadagammanikanta/TaskTracker)
