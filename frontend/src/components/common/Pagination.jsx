@@ -1,30 +1,40 @@
-﻿export default function Pagination({ currentPage, totalPages, onPageChange }) {
+export default function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+
   return (
-    <div className="pagination">
+    <nav className="pagination" aria-label="Pagination">
       <button
-        className="btn btn-secondary"
+        className="pagination-btn"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label="Previous page"
       >
-        Prev
+        ←
       </button>
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+
+      {pages.map(p => (
         <button
-          key={page}
-          className={`btn ${page === currentPage ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => onPageChange(page)}
+          key={p}
+          className={`pagination-btn${p === currentPage ? ' active' : ''}`}
+          onClick={() => onPageChange(p)}
+          aria-label={`Page ${p}`}
+          aria-current={p === currentPage ? 'page' : undefined}
         >
-          {page}
+          {p}
         </button>
       ))}
+
       <button
-        className="btn btn-secondary"
+        className="pagination-btn"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label="Next page"
       >
-        Next
+        →
       </button>
-    </div>
+    </nav>
   );
 }

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getTasks, deleteTask } from '../api/taskApi';
 import TaskCard from '../components/tasks/TaskCard';
@@ -6,39 +6,44 @@ import TaskForm from '../components/tasks/TaskForm';
 import TaskFilters from '../components/tasks/TaskFilters';
 import ConfirmModal from '../components/common/ConfirmModal';
 import Pagination from '../components/common/Pagination';
-import SkeletonCard from '../components/common/SkeletonCard';
 import { useToast } from '../components/common/ToastContext';
+
+function TaskListSkeleton({ count = 6 }) {
+  return (
+    <div className="task-list">
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="skeleton skeleton-row" />
+      ))}
+    </div>
+  );
+}
 
 export default function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [tasks, setTasks] = useState([]);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalCount: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editTask, setEditTask] = useState(null);
-  const [deleteId, setDeleteId] = useState(null);
+  const [tasks,      setTasks]      = useState([]);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalCount: 0 });
+  const [loading,    setLoading]    = useState(true);
+  const [showForm,   setShowForm]   = useState(false);
+  const [editTask,   setEditTask]   = useState(null);
+  const [deleteId,   setDeleteId]   = useState(null);
   const { addToast } = useToast();
 
   const getFilters = useCallback(() => ({
-    status: searchParams.get('status') || '',
+    status:   searchParams.get('status')   || '',
     priority: searchParams.get('priority') || '',
-    search: searchParams.get('search') || '',
-    sortBy: searchParams.get('sortBy') || '',
-    order: searchParams.get('order') || 'desc',
-    page: parseInt(searchParams.get('page') || '1'),
-    limit: 9,
+    search:   searchParams.get('search')   || '',
+    sortBy:   searchParams.get('sortBy')   || '',
+    order:    searchParams.get('order')    || 'desc',
+    page:     parseInt(searchParams.get('page') || '1'),
+    limit:    12,
   }), [searchParams]);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
     try {
       const filters = getFilters();
-      const params = Object.fromEntries(
-        Object.entries(filters).filter(([, v]) => v !== '')
+      const params  = Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v !== '' && v !== 0)
       );
       const res = await getTasks(params);
       setTasks(res.data.tasks);
@@ -53,11 +58,10 @@ export default function TasksPage() {
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
   const updateFilters = (updates) => {
-    const current = Object.fromEntries(searchParams.entries());
+    const current   = Object.fromEntries(searchParams.entries());
     const newParams = { ...current, ...updates };
-    // Remove empty values
     Object.keys(newParams).forEach(k => {
-      if (!newParams[k] && newParams[k] !== 0) delete newParams[k];
+      if (newParams[k] === '' || newParams[k] === undefined) delete newParams[k];
     });
     setSearchParams(newParams);
   };
@@ -65,11 +69,7 @@ export default function TasksPage() {
   const handleSave = (task) => {
     setTasks(prev => {
       const idx = prev.findIndex(t => t._id === task._id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = task;
-        return next;
-      }
+      if (idx >= 0) { const n = [...prev]; n[idx] = task; return n; }
       return [task, ...prev];
     });
   };
@@ -80,54 +80,61 @@ export default function TasksPage() {
       setTasks(prev => prev.filter(t => t._id !== deleteId));
       addToast('Task deleted');
     } catch {
-      addToast('Failed to delete task', 'error');
+      addToast('Failed to delete', 'error');
     } finally {
       setDeleteId(null);
     }
   };
 
-  const handleComplete = (updatedTask) => {
-    setTasks(prev => prev.map(t => t._id === updatedTask._id ? updatedTask : t));
+  const handleComplete = (updated) => {
+    setTasks(prev => prev.map(t => t._id === updated._id ? updated : t));
   };
 
+  const openCreate = () => { setEditTask(null); setShowForm(true); };
   const filters = getFilters();
 
   return (
     <div className="page">
+      {/* Header */}
       <div className="page-header">
         <h1 className="page-title">My Tasks</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => { setEditTask(null); setShowForm(true); }}
-        >
-          + New Task
+        <button className="btn btn-primary btn-sm" onClick={openCreate}>
+          + New task
         </button>
       </div>
 
+      {/* Filters */}
       <TaskFilters filters={filters} onChange={updateFilters} />
 
+      {/* Count */}
       <p className="result-count">
-        {pagination.totalCount} task{pagination.totalCount !== 1 ? 's' : ''} found
+        {pagination.totalCount} {pagination.totalCount === 1 ? 'task' : 'tasks'}
       </p>
 
+      {/* Task list or skeleton or empty */}
       {loading ? (
-        <div className="task-grid">
-          {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
-        </div>
+        <TaskListSkeleton />
       ) : tasks.length === 0 ? (
         <div className="empty-state">
-          <p>
-            No tasks found.{' '}
-            <button
-              className="btn-link"
-              onClick={() => { setEditTask(null); setShowForm(true); }}
-            >
-              Create one
-            </button>
+          <div className="empty-state-icon">✓</div>
+          <p className="empty-state-title">
+            {filters.search || filters.status || filters.priority
+              ? 'No tasks match your filters'
+              : 'No tasks yet'}
           </p>
+          <p className="empty-state-desc">
+            {filters.search || filters.status || filters.priority
+              ? 'Try adjusting or clearing your filters.'
+              : 'Get started by creating your first task.'}
+          </p>
+          {!filters.search && !filters.status && !filters.priority && (
+            <button className="btn btn-primary btn-sm" onClick={openCreate} style={{ marginTop: '0.5rem' }}>
+              Create your first task →
+            </button>
+          )}
         </div>
       ) : (
-        <div className="task-grid">
+        <div className="task-list">
           {tasks.map(task => (
             <TaskCard
               key={task._id}
@@ -140,12 +147,14 @@ export default function TasksPage() {
         </div>
       )}
 
+      {/* Pagination */}
       <Pagination
         currentPage={filters.page}
         totalPages={pagination.totalPages}
         onPageChange={(p) => updateFilters({ page: p })}
       />
 
+      {/* Task form panel */}
       {showForm && (
         <TaskForm
           task={editTask}
@@ -154,9 +163,10 @@ export default function TasksPage() {
         />
       )}
 
+      {/* Delete confirm */}
       <ConfirmModal
         isOpen={!!deleteId}
-        message="Are you sure you want to delete this task?"
+        message="This task will be permanently deleted and cannot be recovered."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
       />
