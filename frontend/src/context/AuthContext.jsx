@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import * as authApi from '../api/authApi';
 
 const AuthContext = createContext(null);
@@ -20,19 +20,31 @@ export function AuthProvider({ children }) {
 
   const login = async (data) => {
     const res = await authApi.login(data);
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token);
+    }
     setUser(res.data.user);
     return res.data.user;
   };
 
   const signup = async (data) => {
     const res = await authApi.signup(data);
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token);
+    }
     setUser(res.data.user);
     return res.data.user;
   };
 
   const logout = async () => {
-    await authApi.logout();
-    setUser(null);
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignore network errors during logout
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (

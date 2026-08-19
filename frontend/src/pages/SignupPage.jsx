@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/ToastContext';
@@ -18,6 +18,9 @@ export default function SignupPage() {
     if (!form.name.trim()) return 'Name is required';
     if (!form.email) return 'Email is required';
     if (form.password.length < 8) return 'Password must be at least 8 characters';
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.password)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number (e.g. Password123)';
+    }
     return null;
   };
 

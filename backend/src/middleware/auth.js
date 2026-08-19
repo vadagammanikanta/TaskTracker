@@ -10,7 +10,12 @@ const ApiError = require('../utils/ApiError');
  * Throws ApiError(401) if the token is missing or invalid.
  */
 const protect = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.token;
+  let token = req.cookies.token;
+
+  // Also check Authorization header: Bearer <token> (for cross-origin environments where 3rd-party cookies are blocked)
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
   if (!token) {
     throw new ApiError(401, 'Not authenticated');
