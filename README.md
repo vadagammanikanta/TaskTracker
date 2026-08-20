@@ -140,7 +140,13 @@ Frontend will start on `http://localhost:5173`.
 
 ## 🔌 API Endpoint Reference
 
-All endpoints return `{ success: true, ... }` on success and `{ success: false, message: "..." }` on error.
+All endpoints return a standardized JSON structure: `{ success: true, ... }` on success and `{ success: false, message: "..." }` on error.
+
+### Health Check
+
+| Method | Endpoint | Auth Required | Params / Body | Description |
+|---|---|:---:|---|---|
+| `GET` | `/api/health` | ❌ | — | API status and health check |
 
 ### Authentication (`/api/auth`)
 
@@ -166,11 +172,75 @@ All endpoints return `{ success: true, ... }` on success and `{ success: false, 
 #### Query Parameters for `GET /api/tasks`
 - `status`: `Todo` | `In Progress` | `Done`
 - `priority`: `Low` | `Medium` | `High`
-- `search`: Case-insensitive title search
+- `search`: Case-insensitive full-text title search
 - `sortBy`: `dueDate` | `priority`
 - `order`: `asc` | `desc` (Default: `desc`)
 - `page`: Page number (Default: `1`)
 - `limit`: Items per page (Default: `12`)
+
+#### Example Responses
+
+<details>
+<summary><b>1. <code>GET /api/tasks/analytics</code></b> (Click to expand)</summary>
+
+```json
+{
+  "success": true,
+  "analytics": {
+    "total": 12,
+    "completed": 5,
+    "pending": 4,
+    "inProgress": 3,
+    "completionPercentage": 42
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>2. <code>GET /api/tasks</code> (Paginated List)</b> (Click to expand)</summary>
+
+```json
+{
+  "success": true,
+  "tasks": [
+    {
+      "_id": "6a85f4eb25a7a2abedd78994",
+      "title": "Design Linear-style UI components",
+      "description": "Build modern row-based list and status selector",
+      "status": "Done",
+      "priority": "High",
+      "dueDate": "2026-08-25T00:00:00.000Z",
+      "userId": "6a85f4eb25a7a2abedd78993",
+      "createdAt": "2026-08-20T10:00:00.000Z",
+      "updatedAt": "2026-08-20T12:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "totalCount": 12,
+    "totalPages": 1,
+    "currentPage": 1,
+    "limit": 12
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>3. <code>POST /api/auth/signup</code></b> (Click to expand)</summary>
+
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...",
+  "user": {
+    "_id": "6a85f4eb25a7a2abedd78993",
+    "name": "Manikanta Vadagam",
+    "email": "mani@example.com"
+  }
+}
+```
+</details>
 
 ---
 
